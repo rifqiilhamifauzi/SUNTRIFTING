@@ -1,0 +1,237 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Category;
+use App\Models\Order;
+use App\Models\Payment;
+use App\Models\Product;
+use App\Models\ProfitShare;
+use App\Models\Supplier;
+use App\Models\User;
+use App\Services\CartService;
+use App\Services\OrderService;
+use App\Services\PaymentService;
+use App\Services\ProfitShareService;
+use App\Services\SupplierPayoutService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Tests\TestCase;
+
+class ThriftMarketplaceTest extends TestCase
+{
+    public function test_public_pages_are_accessible(): void
+    {
+        $response = $this->get('/');
+        $response->assertStatus(200);
+
+        $response = $this->get('/catalog');
+        $response->assertStatus(200);
+
+        $response = $this->get('/offline');
+        $response->assertStatus(200);
+    }
+
+    public function test_guest_cannot_access_admin_dashboard(): void
+    {
+        $response = $this->get('/admin');
+        $response->assertRedirect('/admin/login');
+    }
+
+    public function test_admin_can_login_and_access_dashboard(): void
+    {
+        // 1. Test POST credentials to /admin/login
+        $response = $this->post('/admin/login', [
+            'email' => 'admin@suntrifting.com',
+            'password' => 'password123',
+        ]);
+        $response->assertRedirect('/admin');
+        $this->assertAuthenticated();
+
+        // 2. Access dashboard
+        $dashResponse = $this->get('/admin');
+        $dashResponse->assertStatus(200);
+        $dashResponse->assertSee('Ringkasan & Metrik Bisnis Konsinyasi');
+    }
+
+    public function test_customer_can_add_to_cart_and_checkout(): void
+    {
+        $customer = User::where('role', 'customer')->first();
+        $product = Product::where('status', 'available')->first();
+
+        $cartService = app(CartService::class);
+        $orderService = app(OrderService::class);
+
+        // Add to cart
+        $cartItem = $cartService->addItem($customer, $product->id);
+        $this->assertEquals($product->id, $cartItem->product_id);
+
+        // Checkout
+        $order = $orderService->checkout($customer, [
+            'recipient_name' => 'Budi Customer',
+            'recipient_phone' => '081234567890',
+            'shipping_address' => 'Jl. Kebon Jeruk No. 10',
+            'province' => 'DKI Jakarta',
+            'city' => 'Jakarta Barat',
+            'postal_code' => '11530',
+            'payment_method' => 'manual_bank_transfer',
+        ]);
+
+        $this->assertNotNull($order);
+        $this->assertEquals('pending_payment', $order->order_status);
+        $this->assertEquals('unpaid', $order->payment_status);
+
+        // Product must be reserved
+        $product->refresh();
+        $this->assertEquals('reserved', $product->status);
+    }
+
+    public function test_payment_verification_triggers_accurate_profit_sharing(): void
+    {
+        Storage::fake('public');
+
+        $customer = User::where('role', 'customer')->first();
+        $admin = User::where('role', 'admin')->first();
+
+        $supplier = Supplier::first();
+        $category = Category::first();
+
+        // Create a unique thrift product: Rp200.000 with 10% admin / 90% supplier
+        $product = Product::create([
+            'supplier_id' => $supplier->id,
+            'category_id' => $category->id,
+            'name' => 'Test Thrift Vintage Fleece',
+            'code' => 'TEST-PROD-' . uniqid(),
+            'condition' => 'like_new',
+            'agreed_price' => 180000,
+            'selling_price' => 200000,
+            'admin_commission_pct' => 10.00,
+            'supplier_commission_pct' => 90.00,
+            'status' => 'available',
+        ]);
+
+        $cartService = app(CartService::class);
+        $orderService = app(OrderService::class);
+        $paymentService = app(PaymentService::class);
+
+        // Add to cart & checkout
+        $cartService->addItem($customer, $product->id);
+        $order = $orderService->checkout($customer, [
+            'recipient_name' => 'Test Pembeli',
+            'recipient_phone' => '081234567890',
+            'shipping_address' => 'Jl. Sudirman 1',
+            'province' => 'DKI Jakarta',
+            'city' => 'Jakarta Selatan',
+            'postal_code' => '12190',
+            'payment_method' => 'manual_bank_transfer',
+        ]);
+
+        // Customer uploads payment proof
+        $file = UploadedFile::fake()->image('transfer.jpg');
+        $payment = $paymentService->uploadManualProof($order, $file, [
+            'bank_name' => 'BCA',
+            'account_name' => 'Test Pembeli',
+            'account_number' => '1234567890',
+        ], $customer);
+
+        $order->refresh();
+        $this->assertEquals('waiting_verification', $order->order_status);
+        $this->assertEquals('pending_verification', $order->payment_status);
+
+        // Admin verifies payment
+        $paymentService->verifyPayment($payment, $admin, 'Valid transfer received');
+
+        $order->refresh();
+        $this->assertEquals('processing', $order->order_status);
+        $this->assertEquals('paid', $order->payment_status);
+
+        // Product marked as sold
+        $product->refresh();
+        $this->assertEquals('sold', $product->status);
+
+        // Profit share generated
+        $share = ProfitShare::where('order_id', $order->id)
+            ->where('product_id', $product->id)
+            ->first();
+
+        $this->assertNotNull($share);
+        $this->assertEquals(200000, (float)$share->selling_price);
+        $this->assertEquals(20000, (float)$share->admin_amount); // 10%
+        $this->assertEquals(180000, (float)$share->supplier_amount); // 90%
+        $this->assertEquals('completed', $share->status);
+        $this->assertEquals('unpaid', $share->payout_status);
+    }
+
+    public function test_pwa_manifest_is_valid_json(): void
+    {
+        $manifestPath = public_path('manifest.webmanifest');
+        $this->assertFileExists($manifestPath);
+
+        $json = json_decode(file_get_contents($manifestPath), true);
+        $this->assertIsArray($json);
+        $this->assertEquals('standalone', $json['display']);
+        $this->assertNotEmpty($json['icons']);
+    }
+
+    public function test_supplier_payout_rejects_amount_greater_than_balance(): void
+    {
+        $supplier = Supplier::first();
+        $admin = User::where('role', 'admin')->first();
+        $payoutService = app(SupplierPayoutService::class);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessageMatches('/melebihi saldo/');
+
+        // Attempting to withdraw 999,999,999 which exceeds any supplier balance
+        $payoutService->createPayout($supplier, 999999999, [
+            'payment_method' => 'bank_transfer',
+            'bank_name' => 'BCA',
+            'bank_account_number' => '1234567890',
+            'bank_account_holder' => 'Supplier',
+        ], $admin);
+    }
+
+    public function test_cannot_add_sold_product_to_cart(): void
+    {
+        $customer = User::where('role', 'customer')->first();
+        $soldProduct = Product::where('status', 'sold')->first();
+
+        if (!$soldProduct) {
+            $soldProduct = Product::create([
+                'supplier_id' => Supplier::first()->id,
+                'category_id' => Category::first()->id,
+                'name' => 'Sold Out Thrift Tee',
+                'code' => 'SOLD-' . uniqid(),
+                'condition' => 'good',
+                'agreed_price' => 50000,
+                'selling_price' => 75000,
+                'admin_commission_pct' => 10,
+                'supplier_commission_pct' => 90,
+                'status' => 'sold',
+            ]);
+        }
+
+        $cartService = app(CartService::class);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessageMatches('/tidak tersedia/');
+
+        $cartService->addItem($customer, $soldProduct->id);
+    }
+
+    public function test_admin_can_export_financial_reports_csv_and_pdf(): void
+    {
+        $admin = User::where('role', 'admin')->first();
+
+        // CSV export
+        $csvResponse = $this->actingAs($admin)->get('/admin/reports/export/csv');
+        $csvResponse->assertStatus(200);
+        $this->assertStringContainsString('text/csv', $csvResponse->headers->get('content-type'));
+
+        // PDF export
+        $pdfResponse = $this->actingAs($admin)->get('/admin/reports/export/pdf');
+        $pdfResponse->assertStatus(200);
+        $this->assertStringContainsString('application/pdf', $pdfResponse->headers->get('content-type'));
+    }
+}
