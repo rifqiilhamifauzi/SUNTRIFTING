@@ -20,6 +20,7 @@ use App\Http\Controllers\Customer\CustomerOrderController;
 use App\Http\Controllers\Customer\HomeController;
 use App\Http\Controllers\Customer\ProductDetailController;
 use App\Http\Controllers\Customer\ProfileController;
+use App\Http\Controllers\Customer\WishlistController;
 use App\Http\Controllers\PwaController;
 use Illuminate\Support\Facades\Route;
 
@@ -31,6 +32,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
 Route::get('/product/{code}', [ProductDetailController::class, 'show'])->name('product.show');
+Route::get('/about', function () { return view('customer.about'); })->name('about');
+Route::get('/categories/{id}/subcategories', function ($id) {
+    return response()->json(\App\Models\Category::where('parent_id', $id)->where('is_active', true)->orderBy('sort_order')->orderBy('name')->get());
+})->name('categories.subcategories');
 Route::get('/offline', [PwaController::class, 'offline'])->name('pwa.offline');
 
 /*
@@ -60,6 +65,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
     Route::post('/cart/remove/{productId}', [CartController::class, 'remove'])->name('cart.remove');
+
+    // Wishlist
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+    Route::post('/wishlist/toggle/{productId}', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
 
     // Checkout
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');

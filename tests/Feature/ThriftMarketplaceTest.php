@@ -234,4 +234,63 @@ class ThriftMarketplaceTest extends TestCase
         $pdfResponse->assertStatus(200);
         $this->assertStringContainsString('application/pdf', $pdfResponse->headers->get('content-type'));
     }
+
+    public function test_category_parent_and_subcategory_relationship(): void
+    {
+        $parent = Category::whereNull('parent_id')->has('subcategories')->first();
+        $this->assertNotNull($parent, 'Parent category should exist');
+        $this->assertNotEmpty($parent->subcategories, 'Parent should have subcategories');
+
+        $sub = $parent->subcategories->first();
+        $this->assertEquals($parent->id, $sub->parent_id);
+        $this->assertEquals($parent->name, $sub->parent->name);
+    }
+
+    public function test_customer_can_toggle_wishlist_and_view_wishlist_page(): void
+    {
+        $customer = User::where('role', 'customer')->first();
+        $product = Product::where('status', 'available')->first();
+
+        // 1. Toggle to add (via JSON)
+        $response = $this->actingAs($customer)->postJson('/wishlist/toggle/' . $product->id);
+        $response->assertStatus(200);
+        $response->assertJson(['success' => true, 'added' => true]);
+        $this->assertTrue($product->isWishlistedBy($customer));
+
+        // 2. View wishlist page
+        $pageResponse = $this->actingAs($customer)->get('/wishlist');
+        $pageResponse->assertStatus(200);
+        $pageResponse->assertSee($product->name);
+
+        // 3. Toggle to remove
+        $removeResponse = $this->actingAs($customer)->postJson('/wishlist/toggle/' . $product->id);
+        $removeResponse->assertStatus(200);
+        $removeResponse->assertJson(['success' => true, 'added' => false]);
+        $this->assertFalse($product->isWishlistedBy($customer));
+    }
+
+    public function test_catalog_supports_parent_category_condition_and_gender_filtering(): void
+    {
+        $parentCategory = Category::whereNull('parent_id')->first();
+
+        // Filter by category
+        $response = $this->get('/catalog?category=' . $parentCategory->slug);
+        $response->assertStatus(200);
+
+        // Filter by condition
+        $condResponse = $this->get('/catalog?condition=brand_new');
+        $condResponse->assertStatus(200);
+
+        // Filter by gender
+        $genderResponse = $this->get('/catalog?gender=women');
+        $genderResponse->assertStatus(200);
+    }
+
+    public function test_about_page_is_accessible(): void
+    {
+        $response = $this->get('/about');
+        $response->assertStatus(200);
+        $response->assertSee('SUN-THRIFTING');
+        $response->assertSee('Titip Jual');
+    }
 }

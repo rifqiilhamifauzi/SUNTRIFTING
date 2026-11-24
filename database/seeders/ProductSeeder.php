@@ -13,269 +13,463 @@ class ProductSeeder extends Seeder
 {
     public function run(): void
     {
-        $supplierBdg = Supplier::where('name', 'like', '%Bandung%')->first();
-        $supplierJogja = Supplier::where('name', 'like', '%Jogja%')->first();
-        $supplierSenen = Supplier::where('name', 'like', '%Senen%')->first();
-        $supplierMlg = Supplier::where('name', 'like', '%Malang%')->first();
+        $supplierMadinah = Supplier::where('name', 'like', '%Madinah%')->first() ?: Supplier::first();
+        $supplierBayan = Supplier::where('name', 'like', '%Bayan%')->first() ?: Supplier::first();
+        $supplierHijab = Supplier::where('name', 'like', '%Hijab%')->first() ?: Supplier::first();
+        $supplierSakinah = Supplier::where('name', 'like', '%Sakinah%')->first() ?: Supplier::first();
 
-        $catJackets = Category::where('slug', 'vintage-jackets-outerwear')->first();
-        $catHoodies = Category::where('slug', 'crewnecks-hoodies')->first();
-        $catTees = Category::where('slug', 'vintage-tees-shirts')->first();
-        $catPants = Category::where('slug', 'pants-denim')->first();
-        $catCaps = Category::where('slug', 'caps-accessories')->first();
+        // Get parent categories
+        $catWanita = Category::where('slug', 'pakaian-muslim-wanita')->first();
+        $catPria = Category::where('slug', 'pakaian-muslim-pria')->first();
+        $catHijab = Category::where('slug', 'hijab-kerudung')->first();
+        $catIbadah = Category::where('slug', 'perlengkapan-ibadah')->first();
+        $catAksesori = Category::where('slug', 'aksesori-muslim')->first();
+        $catAnak = Category::where('slug', 'fashion-muslim-anak')->first();
 
-        // Ensure storage directory exists
+        // Subcategories
+        $subAbaya = Category::where('name', 'Abaya')->first();
+        $subGamis = Category::where('name', 'Gamis')->first();
+        $subTunik = Category::where('name', 'Tunik')->first();
+        $subKoko = Category::where('name', 'Baju Koko')->first();
+        $subKurta = Category::where('name', 'Kurta')->first();
+        $subSirwal = Category::where('name', 'Celana Sirwal')->first();
+        $subPashmina = Category::where('name', 'Pashmina')->first();
+        $subSegiEmpat = Category::where('name', 'Hijab Segi Empat')->first();
+        $subMukena = Category::where('name', 'Mukena')->first();
+        $subSajadah = Category::where('name', 'Sajadah')->first();
+        $subBros = Category::where('name', 'Bros Hijab')->first();
+        $subGamisAnak = Category::where('name', 'Gamis Anak')->first();
+
         $storageDir = storage_path('app/public/products');
         if (!File::exists($storageDir)) {
             File::makeDirectory($storageDir, 0755, true);
         }
 
-        $productsData = [
+        $items = [
             [
-                'supplier_id' => $supplierBdg->id,
-                'category_id' => $catJackets->id,
-                'name' => 'Vintage Carhartt Detroit Jacket J97 Moss Green',
-                'code' => 'ST-JKT-001',
-                'description' => 'Jaket Carhartt J97 Detroit Jacket warna Moss Green vintage authentic. Bahan heavy canvas cotton dengan blanket lining corduroy collar. Fading natural sangat cakep (distressed look). Kancing dan zipper tembaga original YKK.',
-                'condition' => 'good',
-                'agreed_price' => 1125000,
-                'selling_price' => 1250000,
-                'admin_commission_pct' => 10.00,
-                'supplier_commission_pct' => 90.00,
-                'size' => 'L (P: 66cm, L: 62cm)',
-                'brand' => 'Carhartt',
-                'color' => 'Moss Green',
-                'weight_grams' => 1100,
-                'status' => 'available',
-                'image_filename' => 'carhartt-detroit.svg',
-                'color_bg' => '#3E4E3B',
-                'color_txt' => '#FAF9F6',
-            ],
-            [
-                'supplier_id' => $supplierBdg->id,
-                'category_id' => $catJackets->id,
-                'name' => 'Levi\'s Type III Denim Trucker Jacket 70505',
-                'code' => 'ST-JKT-002',
-                'description' => 'Vintage Levi’s Type 3 denim jacket vintage era 80-90an. Made in USA, wash denim medium fade alami dengan whiskering di lengan. Red tab Levi’s terpasang utuh.',
-                'condition' => 'like_new',
-                'agreed_price' => 585000,
-                'selling_price' => 650000,
-                'admin_commission_pct' => 10.00,
-                'supplier_commission_pct' => 90.00,
-                'size' => 'M (P: 62cm, L: 54cm)',
-                'brand' => 'Levi\'s',
-                'color' => 'Indigo Blue',
-                'weight_grams' => 850,
-                'status' => 'available',
-                'image_filename' => 'levis-trucker.svg',
-                'color_bg' => '#2A4465',
-                'color_txt' => '#FAF9F6',
-            ],
-            [
-                'supplier_id' => $supplierSenen->id,
-                'category_id' => $catHoodies->id,
-                'name' => 'Champion Reverse Weave Crewneck Grey Heather',
-                'code' => 'ST-HD-001',
-                'description' => 'Champion Reverse Weave classic heavy cotton crewneck. Logo C patch bordir di dada dan lengan kiri. Bahan tebal 12oz tahan susut, ribbing pinggang & pergelangan tangan rapat.',
-                'condition' => 'like_new',
-                'agreed_price' => 378000,
-                'selling_price' => 420000,
-                'admin_commission_pct' => 10.00,
-                'supplier_commission_pct' => 90.00,
-                'size' => 'XL (P: 72cm, L: 64cm)',
-                'brand' => 'Champion',
-                'color' => 'Grey Heather',
-                'weight_grams' => 700,
-                'status' => 'available',
-                'image_filename' => 'champion-crewneck.svg',
-                'color_bg' => '#8C9095',
-                'color_txt' => '#1C1C1C',
-            ],
-            [
-                'supplier_id' => $supplierSenen->id,
-                'category_id' => $catHoodies->id,
-                'name' => 'Nike Center Swoosh Vintage Hoodie Navy 90s',
-                'code' => 'ST-HD-002',
-                'description' => 'Koleksi langka hoodie Nike vintage era 90-an dengan bordir Center Swoosh mini di tengah dada. Tag abu-abu (Grey Tag) vintage. Kondisi prima tanpa noda.',
-                'condition' => 'good',
-                'agreed_price' => 675000,
-                'selling_price' => 750000,
-                'admin_commission_pct' => 10.00,
-                'supplier_commission_pct' => 90.00,
-                'size' => 'L (P: 68cm, L: 60cm)',
-                'brand' => 'Nike',
-                'color' => 'Navy Blue',
-                'weight_grams' => 650,
-                'status' => 'available',
-                'image_filename' => 'nike-center-swoosh.svg',
-                'color_bg' => '#18253D',
-                'color_txt' => '#FAF9F6',
-            ],
-            [
-                'supplier_id' => $supplierJogja->id,
-                'category_id' => $catTees->id,
-                'name' => 'Nirvana In Utero 1993 Vintage Band Tee',
-                'code' => 'ST-TEE-001',
-                'description' => 'Kaos band vintage Nirvana In Utero album art. Single stitch hem, bahan ultra soft wash cotton dengan crackling natural pada sablonan. Tag Brockum vintage.',
-                'condition' => 'good',
-                'agreed_price' => 855000,
-                'selling_price' => 950000,
-                'admin_commission_pct' => 10.00,
-                'supplier_commission_pct' => 90.00,
-                'size' => 'L (P: 71cm, L: 56cm)',
-                'brand' => 'Nirvana / Brockum',
-                'color' => 'Faded Charcoal Black',
-                'weight_grams' => 220,
-                'status' => 'available',
-                'image_filename' => 'nirvana-tee.svg',
-                'color_bg' => '#242424',
-                'color_txt' => '#EAE5DC',
-            ],
-            [
-                'supplier_id' => $supplierJogja->id,
-                'category_id' => $catTees->id,
-                'name' => 'Ralph Lauren Classic Oxford Button-Down Striped Shirt',
-                'code' => 'ST-TEE-002',
-                'description' => 'Kemeja vintage Ralph Lauren Polo bahan oxford cotton tebal motif garis biru putih klasik. Bordir pony warna navy di dada kiri. Cocok untuk casual preppy look.',
-                'condition' => 'like_new',
-                'agreed_price' => 270000,
-                'selling_price' => 300000,
-                'admin_commission_pct' => 10.00,
-                'supplier_commission_pct' => 90.00,
-                'size' => 'M (P: 74cm, L: 55cm)',
-                'brand' => 'Ralph Lauren',
-                'color' => 'Blue/White Stripe',
-                'weight_grams' => 300,
-                'status' => 'available',
-                'image_filename' => 'polo-oxford.svg',
-                'color_bg' => '#4A6B82',
-                'color_txt' => '#FAF9F6',
-            ],
-            [
-                'supplier_id' => $supplierMlg->id,
-                'category_id' => $catPants->id,
-                'name' => 'Levi\'s 501 Original Straight Fit Vintage 90s Made in USA',
-                'code' => 'ST-PNT-001',
-                'description' => 'Celana denim ikonik Levi’s 501 Button Fly Made in USA era 1994. Kode kancing 553. Indigo wash fade autentik, belum pernah dipotong (inseam original).',
-                'condition' => 'good',
-                'agreed_price' => 495000,
-                'selling_price' => 550000,
-                'admin_commission_pct' => 10.00,
-                'supplier_commission_pct' => 90.00,
-                'size' => 'W32 L32 (Lingkar 84cm, P: 104cm)',
-                'brand' => 'Levi\'s',
-                'color' => 'Classic Stone Wash',
-                'weight_grams' => 750,
-                'status' => 'available',
-                'image_filename' => 'levis-501.svg',
-                'color_bg' => '#324E6B',
-                'color_txt' => '#FAF9F6',
-            ],
-            [
-                'supplier_id' => $supplierBdg->id,
-                'category_id' => $catPants->id,
-                'name' => 'Dickies Double Knee Work Pants Khaki',
-                'code' => 'ST-PNT-002',
-                'description' => 'Celana Dickies Loose Fit Double Knee warna Khaki. Bahan twill kokoh tahan banting khas workwear Amerika. Bagian lutut tebal berlayer. Tag woven original.',
+                'supplier_id' => $supplierMadinah->id,
+                'category_id' => $catWanita->id,
+                'subcategory_id' => $subAbaya?->id,
+                'name' => 'Abaya Dubai Hitam Bordir Emas Vintage Authentic',
+                'code' => 'ST-ABY-001',
+                'description' => 'Abaya hitam khas Timur Tengah berbahan nida premium jatuh, halus dan dingin. Detail bordir benang emas asli di pergelangan tangan dan bagian dada. Busui friendly dengan resleting jepang tersembunyi. Kondisi preloved sangat terawat, dipakai 2 kali untuk resepsi keluarga.',
                 'condition' => 'like_new',
                 'agreed_price' => 315000,
                 'selling_price' => 350000,
+                'original_price' => 750000,
                 'admin_commission_pct' => 10.00,
                 'supplier_commission_pct' => 90.00,
-                'size' => 'W30 L30 (Lingkar 80cm, P: 100cm)',
-                'brand' => 'Dickies',
-                'color' => 'Khaki Tan',
-                'weight_grams' => 600,
+                'size' => 'M-L (LD: 105cm, PB: 140cm)',
+                'brand' => 'Al-Haramain Dubai',
+                'color' => 'Jet Black / Gold',
+                'material' => 'Nida Premium Jetblack',
+                'gender' => 'women',
+                'location' => 'Bandung',
+                'is_used' => true,
+                'defect_description' => null,
+                'weight_grams' => 650,
                 'status' => 'available',
-                'image_filename' => 'dickies-double-knee.svg',
-                'color_bg' => '#A89472',
-                'color_txt' => '#1C1C1C',
+                'svg_file' => 'abaya-dubai.svg',
+                'title_short' => 'ABAYA DUBAI',
+                'tag_sub' => 'VINTAGE JETBLACK',
+                'color_bg' => '#174C3C',
+                'color_accent' => '#D4AF37',
             ],
             [
-                'supplier_id' => $supplierSenen->id,
-                'category_id' => $catCaps->id,
-                'name' => 'Stussy Vintage S Crown Embroidered Snapback Cap',
-                'code' => 'ST-ACC-001',
-                'description' => 'Topi vintage Stussy International dengan bordir mahkota S crown iconic. Warna hitam washed dengan strap belakang adjustable. Made in USA.',
-                'condition' => 'fair',
-                'agreed_price' => 225000,
-                'selling_price' => 250000,
+                'supplier_id' => $supplierMadinah->id,
+                'category_id' => $catWanita->id,
+                'subcategory_id' => $subGamis?->id,
+                'name' => 'Gamis Linen Crinkle Syar\'i Earthy Olive',
+                'code' => 'ST-GMS-002',
+                'description' => 'Gamis kasual berbahan linen crinkle premium dengan potongan A-line yang flowy. Terdapat saku kanan-kiri fungsional dan manset kancing wudhu friendly. Bahan adem dan tidak menerawang, sangat cocok untuk pengajian atau santai sehari-hari.',
+                'condition' => 'good',
+                'agreed_price' => 171000,
+                'selling_price' => 190000,
+                'original_price' => 380000,
                 'admin_commission_pct' => 10.00,
                 'supplier_commission_pct' => 90.00,
-                'size' => 'Free Size / Adjustable',
-                'brand' => 'Stussy',
-                'color' => 'Washed Black',
+                'size' => 'L (LD: 108cm, PB: 138cm)',
+                'brand' => 'Vanilla Hijab Archive',
+                'color' => 'Olive Sage',
+                'material' => 'Linen Crinkle Airflow',
+                'gender' => 'women',
+                'location' => 'Bandung',
+                'is_used' => true,
+                'defect_description' => 'Sedikit benang halus terlepas di bagian kelim bawah dalam, sama sekali tidak tampak saat dikenakan.',
+                'weight_grams' => 500,
+                'status' => 'available',
+                'svg_file' => 'gamis-linen.svg',
+                'title_short' => 'GAMIS LINEN',
+                'tag_sub' => 'EARTHY OLIVE',
+                'color_bg' => '#26745A',
+                'color_accent' => '#EAE3D5',
+            ],
+            [
+                'supplier_id' => $supplierMadinah->id,
+                'category_id' => $catWanita->id,
+                'subcategory_id' => $subTunik?->id,
+                'name' => 'Tunik Busui Asimetris Pastel Floral Silk',
+                'code' => 'ST-TNK-003',
+                'description' => 'Tunik motif bunga lembut pastel dengan potongan hem asimetris modern. Bahan dior silk lembut dengan kilau anggun. Dilengkapi kancing aktif depan untuk kemudahan ibu menyusui.',
+                'condition' => 'brand_new',
+                'agreed_price' => 202500,
+                'selling_price' => 225000,
+                'original_price' => 450000,
+                'admin_commission_pct' => 10.00,
+                'supplier_commission_pct' => 90.00,
+                'size' => 'All Size fit to XL (LD: 110cm)',
+                'brand' => 'Ria Miranda Curated',
+                'color' => 'Dusty Rose & Cream',
+                'material' => 'Dior Silk High Quality',
+                'gender' => 'women',
+                'location' => 'Jakarta Selatan',
+                'is_used' => false,
+                'defect_description' => null,
+                'weight_grams' => 380,
+                'status' => 'available',
+                'svg_file' => 'tunik-floral.svg',
+                'title_short' => 'TUNIK FLORAL',
+                'tag_sub' => 'BRAND NEW TAG',
+                'color_bg' => '#858B87',
+                'color_accent' => '#F8F6F0',
+            ],
+            [
+                'supplier_id' => $supplierBayan->id,
+                'category_id' => $catPria->id,
+                'subcategory_id' => $subKoko?->id,
+                'name' => 'Baju Koko Katun Madinah Sage Green Lengan Panjang',
+                'code' => 'ST-KOKO-004',
+                'description' => 'Koko lengan panjang khas katun Madinah dengan serat kain bertekstur two-tone natural. Kerah shanghai minimalis dengan aksen kancing tertutup rapi. Sangat nyaman untuk salat Jumat maupun kegiatan kajian.',
+                'condition' => 'like_new',
+                'agreed_price' => 144000,
+                'selling_price' => 160000,
+                'original_price' => 320000,
+                'admin_commission_pct' => 10.00,
+                'supplier_commission_pct' => 90.00,
+                'size' => 'XL (Lebar Dada: 58cm, PB: 76cm)',
+                'brand' => 'Rabbani Heritage',
+                'color' => 'Sage Green',
+                'material' => 'Katun Madinah Original',
+                'gender' => 'men',
+                'location' => 'Yogyakarta',
+                'is_used' => true,
+                'defect_description' => null,
+                'weight_grams' => 350,
+                'status' => 'available',
+                'svg_file' => 'koko-madinah.svg',
+                'title_short' => 'KOKO MADINAH',
+                'tag_sub' => 'SAGE GREEN LONG',
+                'color_bg' => '#174C3C',
+                'color_accent' => '#F8F6F0',
+            ],
+            [
+                'supplier_id' => $supplierBayan->id,
+                'category_id' => $catPria->id,
+                'subcategory_id' => $subKurta?->id,
+                'name' => 'Kurta Modern Minimalis Katun Oxford Khaki',
+                'code' => 'ST-KRT-005',
+                'description' => 'Kurta panjang sepinggul dengan potongan modern minimalis. Bahan katun oxford premium yang tebal namun tetap adem. Dilengkapi saku samping kanan-kiri yang lega untuk menyimpan dompet dan buku doa.',
+                'condition' => 'good',
+                'agreed_price' => 121500,
+                'selling_price' => 135000,
+                'original_price' => 275000,
+                'admin_commission_pct' => 10.00,
+                'supplier_commission_pct' => 90.00,
+                'size' => 'L (LD: 55cm, PB: 84cm)',
+                'brand' => 'Samase Preloved',
+                'color' => 'Warm Khaki',
+                'material' => 'Oxford Cotton',
+                'gender' => 'men',
+                'location' => 'Yogyakarta',
+                'is_used' => true,
+                'defect_description' => 'Warna sedikit pudar wajar pemakaian di bagian dalam kerah belakang, bagian luar mulus bersih.',
+                'weight_grams' => 400,
+                'status' => 'available',
+                'svg_file' => 'kurta-oxford.svg',
+                'title_short' => 'KURTA MODERN',
+                'tag_sub' => 'OXFORD KHAKI',
+                'color_bg' => '#252A27',
+                'color_accent' => '#EAE3D5',
+            ],
+            [
+                'supplier_id' => $supplierBayan->id,
+                'category_id' => $catPria->id,
+                'subcategory_id' => $subSirwal?->id,
+                'name' => 'Celana Sirwal Chino Casual Semi-Slim Black',
+                'code' => 'ST-SRW-006',
+                'description' => 'Celana sirwal model chino di atas mata kaki (laa isbal) dengan potongan semi-slim rapi. Pinggang karet bertali serut fleksibel. Dilengkapi 4 saku fungsional. Sangat cocok dipadukan dengan koko modern atau kemeja santai.',
+                'condition' => 'like_new',
+                'agreed_price' => 130500,
+                'selling_price' => 145000,
+                'original_price' => 260000,
+                'admin_commission_pct' => 10.00,
+                'supplier_commission_pct' => 90.00,
+                'size' => '32-34 (Panjang 88cm)',
+                'brand' => 'Bunayya Sunnah Clothing',
+                'color' => 'Solid Black',
+                'material' => 'Twill Chino Stretch',
+                'gender' => 'men',
+                'location' => 'Yogyakarta',
+                'is_used' => true,
+                'defect_description' => null,
+                'weight_grams' => 450,
+                'status' => 'available',
+                'svg_file' => 'sirwal-chino.svg',
+                'title_short' => 'SIRWAL CHINO',
+                'tag_sub' => 'CASUAL STRETCH',
+                'color_bg' => '#252A27',
+                'color_accent' => '#26745A',
+            ],
+            [
+                'supplier_id' => $supplierHijab->id,
+                'category_id' => $catHijab->id,
+                'subcategory_id' => $subPashmina?->id,
+                'name' => 'Pashmina Silk Shimmer Soft Emerald Glow',
+                'code' => 'ST-PSH-007',
+                'description' => 'Pashmina silk shimmer mewah dengan efek kilau elegan tanpa terkesan berlebihan. Tekstur lembut, mudah dibentuk tegak di dahi dan tidak licin saat memakai inner. Cocok untuk acara formal maupun daily styling.',
+                'condition' => 'brand_new',
+                'agreed_price' => 85500,
+                'selling_price' => 95000,
+                'original_price' => 180000,
+                'admin_commission_pct' => 10.00,
+                'supplier_commission_pct' => 90.00,
+                'size' => '180 x 75 cm',
+                'brand' => 'Buttonscarves Archive',
+                'color' => 'Soft Emerald',
+                'material' => 'Cradle Shimmer Silk',
+                'gender' => 'women',
+                'location' => 'Jakarta Selatan',
+                'is_used' => false,
+                'defect_description' => null,
+                'weight_grams' => 180,
+                'status' => 'available',
+                'svg_file' => 'pashmina-silk.svg',
+                'title_short' => 'PASHMINA SILK',
+                'tag_sub' => 'SHIMMER EMERALD',
+                'color_bg' => '#26745A',
+                'color_accent' => '#F8F6F0',
+            ],
+            [
+                'supplier_id' => $supplierHijab->id,
+                'category_id' => $catHijab->id,
+                'subcategory_id' => $subSegiEmpat?->id,
+                'name' => 'Hijab Segi Empat Voal Ultrafine Motif Khazanah Beige',
+                'code' => 'ST-SGT-008',
+                'description' => 'Jilbab segi empat voal ultrafine motif ornamen islami geometris minimalis warna earth tone beige. Finishing lasercut rapi di keempat sisinya. Bahan dingin, tegak paripurna di dahi tanpa perlu semprotan hairspray.',
+                'condition' => 'like_new',
+                'agreed_price' => 112500,
+                'selling_price' => 125000,
+                'original_price' => 245000,
+                'admin_commission_pct' => 10.00,
+                'supplier_commission_pct' => 90.00,
+                'size' => '115 x 115 cm',
+                'brand' => 'Kami Idea Preloved',
+                'color' => 'Warm Beige / Muted Gold',
+                'material' => 'Voal Ultrafine Tryspan',
+                'gender' => 'women',
+                'location' => 'Jakarta Selatan',
+                'is_used' => true,
+                'defect_description' => null,
                 'weight_grams' => 150,
                 'status' => 'available',
-                'image_filename' => 'stussy-cap.svg',
-                'color_bg' => '#1F1F1F',
-                'color_txt' => '#FAF9F6',
+                'svg_file' => 'voal-motif.svg',
+                'title_short' => 'VOAL ULTRAFINE',
+                'tag_sub' => 'LASERCUT MOTIF',
+                'color_bg' => '#EAE3D5',
+                'color_accent' => '#174C3C',
             ],
             [
-                'supplier_id' => $supplierMlg->id,
-                'category_id' => $catJackets->id,
-                'name' => 'Patagonia Retro-X Deep Pile Fleece Jacket',
-                'code' => 'ST-JKT-003',
-                'description' => 'Jaket fleece tebal Patagonia Classic Retro-X warna Natural Beige dengan saku dada warna Navy. Windproof barrier mesh lining hangat dan nyaman.',
+                'supplier_id' => $supplierSakinah->id,
+                'category_id' => $catIbadah->id,
+                'subcategory_id' => $subMukena?->id,
+                'name' => 'Mukena Silk Renda Prancis Premium Travelling Set',
+                'code' => 'ST-MKN-009',
+                'description' => 'Mukena bahan armany silk dingin lembut dengan aplikasi renda prancis premium di tepian atasan. Ringan dan ringkas, sudah termasuk pouch travel clutch dan sajadah muka kecil. Kondisi mulus bersih tanpa noda.',
                 'condition' => 'like_new',
-                'agreed_price' => 990000,
-                'selling_price' => 1100000,
+                'agreed_price' => 261000,
+                'selling_price' => 290000,
+                'original_price' => 580000,
                 'admin_commission_pct' => 10.00,
                 'supplier_commission_pct' => 90.00,
-                'size' => 'M (P: 67cm, L: 56cm)',
-                'brand' => 'Patagonia',
-                'color' => 'Natural / Classic Navy',
-                'weight_grams' => 780,
+                'size' => 'Jumbo Syar\'i Dewasa',
+                'brand' => 'Tazbiya Curated',
+                'color' => 'Forest Sage & Cream',
+                'material' => 'Armany Silk + French Lace',
+                'gender' => 'women',
+                'location' => 'Malang',
+                'is_used' => true,
+                'defect_description' => null,
+                'weight_grams' => 550,
                 'status' => 'available',
-                'image_filename' => 'patagonia-fleece.svg',
-                'color_bg' => '#D8CEBE',
-                'color_txt' => '#1C1C1C',
+                'svg_file' => 'mukena-silk.svg',
+                'title_short' => 'MUKENA SILK',
+                'tag_sub' => 'FRENCH LACE POUCH',
+                'color_bg' => '#174C3C',
+                'color_accent' => '#F8F6F0',
+            ],
+            [
+                'supplier_id' => $supplierSakinah->id,
+                'category_id' => $catIbadah->id,
+                'subcategory_id' => $subSajadah?->id,
+                'name' => 'Sajadah Busa Turkey Tebal Ornamen Mihrab Vintage',
+                'code' => 'ST-SJD-010',
+                'description' => 'Sajadah import Turki dengan lapisan busa empuk 1.5 cm di dalam, sangat nyaman untuk sujud dan pelindung lutut. Bulu beludru padat anti-rontok dengan rumbai benang sutra emas di kedua ujungnya.',
+                'condition' => 'good',
+                'agreed_price' => 162000,
+                'selling_price' => 180000,
+                'original_price' => 350000,
+                'admin_commission_pct' => 10.00,
+                'supplier_commission_pct' => 90.00,
+                'size' => '70 x 115 cm (Tebal 15mm)',
+                'brand' => 'Istanbul Heritage Carpet',
+                'color' => 'Deep Emerald & Gold',
+                'material' => 'Velvet Silk Foam Cushioned',
+                'gender' => 'unisex',
+                'location' => 'Malang',
+                'is_used' => true,
+                'defect_description' => 'Ada sedikit jejak tekanan lipatan busa di sisi bawah, tidak mempengaruhi kenyamanan sujud sama sekali.',
+                'weight_grams' => 950,
+                'status' => 'available',
+                'svg_file' => 'sajadah-turkey.svg',
+                'title_short' => 'SAJADAH TURKEY',
+                'tag_sub' => 'VELVET CUSHIONED',
+                'color_bg' => '#174C3C',
+                'color_accent' => '#D4AF37',
+            ],
+            [
+                'supplier_id' => $supplierHijab->id,
+                'category_id' => $catAksesori->id,
+                'subcategory_id' => $subBros?->id,
+                'name' => 'Bros Hijab Mutiara Barok Zirconia Anti-Karat',
+                'code' => 'ST-BRS-011',
+                'description' => 'Bros hijab mewah dengan kombinasi mutiara barok alami dan taburan kristal zirconia berkilau. Pin peniti tajam tidak merusak serat kain jilbab sutra maupun voal. Dilengkapi kotak perhiasan beludru asli.',
+                'condition' => 'brand_new',
+                'agreed_price' => 76500,
+                'selling_price' => 85000,
+                'original_price' => 165000,
+                'admin_commission_pct' => 10.00,
+                'supplier_commission_pct' => 90.00,
+                'size' => 'Diameter 4.5 cm',
+                'brand' => 'Khadijah Atelier',
+                'color' => 'Silver Pearl',
+                'material' => 'Alloy Rhodium + Freshwater Pearl',
+                'gender' => 'women',
+                'location' => 'Jakarta Selatan',
+                'is_used' => false,
+                'defect_description' => null,
+                'weight_grams' => 120,
+                'status' => 'available',
+                'svg_file' => 'bros-mutiara.svg',
+                'title_short' => 'BROS MUTIARA',
+                'tag_sub' => 'ZIRCONIA RHODIUM',
+                'color_bg' => '#858B87',
+                'color_accent' => '#FFFFFF',
+            ],
+            [
+                'supplier_id' => $supplierMadinah->id,
+                'category_id' => $catAnak->id,
+                'subcategory_id' => $subGamisAnak?->id,
+                'name' => 'Gamis Anak Katun Jepang Motif Bunga Ruffle Lilac',
+                'code' => 'ST-ANK-012',
+                'description' => 'Set gamis anak perempuan berbahan katun jepang tokai original dengan jilbab bergo senada. Lembut, menyerap keringat dan tidak gerah saat dipakai si kecil beraktivitas. Tali pinggang belakang untuk menyesuaikan lingkar tubuh.',
+                'condition' => 'like_new',
+                'agreed_price' => 99000,
+                'selling_price' => 110000,
+                'original_price' => 220000,
+                'admin_commission_pct' => 10.00,
+                'supplier_commission_pct' => 90.00,
+                'size' => 'Size 6 (Usia 5-7 Tahun, LD: 74cm, PB: 90cm)',
+                'brand' => 'Cutetrik Kids',
+                'color' => 'Lilac Pastel & White',
+                'material' => '100% Katun Jepang Tokai',
+                'gender' => 'kids',
+                'location' => 'Bandung',
+                'is_used' => true,
+                'defect_description' => null,
+                'weight_grams' => 300,
+                'status' => 'available',
+                'svg_file' => 'gamis-anak.svg',
+                'title_short' => 'GAMIS ANAK',
+                'tag_sub' => 'KATUN JEPANG SET',
+                'color_bg' => '#26745A',
+                'color_accent' => '#F8F6F0',
             ],
         ];
 
-        foreach ($productsData as $data) {
-            $filename = $data['image_filename'];
+        foreach ($items as $data) {
+            $svgFile = $data['svg_file'];
+            $titleShort = $data['title_short'];
+            $tagSub = $data['tag_sub'];
             $colorBg = $data['color_bg'];
-            $colorTxt = $data['color_txt'];
-            $brand = $data['brand'];
-            $nameShort = substr($data['name'], 0, 32);
+            $colorAccent = $data['color_accent'];
 
-            unset($data['image_filename'], $data['color_bg'], $data['color_txt']);
+            unset($data['svg_file'], $data['title_short'], $data['tag_sub'], $data['color_bg'], $data['color_accent']);
 
-            // Create handsome vector graphic SVG for local offline preview
+            // Generate clean SVG visual
+            $filePath = $storageDir . '/' . $svgFile;
             $svgContent = <<<SVG
-<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
-  <rect width="600" height="600" fill="{$colorBg}" />
-  <rect x="30" y="30" width="540" height="540" fill="none" stroke="{$colorTxt}" stroke-width="2" stroke-opacity="0.3" rx="16" />
-  <circle cx="300" cy="240" r="100" fill="{$colorTxt}" fill-opacity="0.08" />
-  <path d="M 240 280 C 240 210, 360 210, 360 280 C 360 330, 240 330, 240 280 Z" fill="{$colorTxt}" fill-opacity="0.15" />
-  <text x="300" y="240" font-family="'Plus Jakarta Sans', sans-serif" font-size="28" font-weight="700" fill="{$colorTxt}" text-anchor="middle" letter-spacing="4">{$brand}</text>
-  <text x="300" y="275" font-family="'Inter', sans-serif" font-size="14" fill="{$colorTxt}" fill-opacity="0.7" text-anchor="middle" letter-spacing="2">AUTHENTIC THRIFT</text>
-  <rect x="180" y="370" width="240" height="1" fill="{$colorTxt}" fill-opacity="0.2" />
-  <text x="300" y="420" font-family="'Plus Jakarta Sans', sans-serif" font-size="18" font-weight="600" fill="{$colorTxt}" text-anchor="middle">{$nameShort}</text>
-  <text x="300" y="450" font-family="'Inter', sans-serif" font-size="13" fill="{$colorTxt}" fill-opacity="0.6" text-anchor="middle">SUNVALLEY CONSIGNMENT ARCHIVE</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="100%" height="100%">
+  <defs>
+    <linearGradient id="grad-{$data['code']}" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="{$colorBg}" />
+      <stop offset="100%" stop-color="#12352A" />
+    </linearGradient>
+    <pattern id="pat-{$data['code']}" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="20" cy="20" r="1.5" fill="{$colorAccent}" opacity="0.15" />
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="1000" fill="url(#grad-{$data['code']})" />
+  <rect width="800" height="1000" fill="url(#pat-{$data['code']})" />
+
+  <!-- Frame / Border -->
+  <rect x="40" y="40" width="720" height="920" rx="24" fill="none" stroke="{$colorAccent}" stroke-width="2" opacity="0.3" />
+  <rect x="52" y="52" width="696" height="896" rx="16" fill="none" stroke="{$colorAccent}" stroke-width="1" opacity="0.15" />
+
+  <!-- Brand Watermark -->
+  <text x="400" y="140" font-family="'Plus Jakarta Sans', sans-serif" font-size="20" font-weight="800" fill="{$colorAccent}" text-anchor="middle" letter-spacing="8" opacity="0.85">SUN-THRIFTING</text>
+  <text x="400" y="170" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="#FAF9F6" text-anchor="middle" letter-spacing="4" opacity="0.6">CURATED MUSLIM ARCHIVE</text>
+
+  <!-- Center Decorative Emblem -->
+  <g transform="translate(400, 480)">
+    <circle r="180" fill="none" stroke="{$colorAccent}" stroke-width="2" stroke-dasharray="6,6" opacity="0.35" />
+    <circle r="150" fill="rgba(255,255,255,0.04)" stroke="{$colorAccent}" stroke-width="1.5" opacity="0.6" />
+    
+    <!-- Geometric Islamic Star / Octagram Accent -->
+    <rect x="-60" y="-60" width="120" height="120" rx="12" fill="none" stroke="{$colorAccent}" stroke-width="2.5" opacity="0.8" />
+    <rect x="-60" y="-60" width="120" height="120" rx="12" fill="none" stroke="{$colorAccent}" stroke-width="2.5" opacity="0.8" transform="rotate(45)" />
+    
+    <!-- Item Icon / Lettering -->
+    <text x="0" y="12" font-family="'Plus Jakarta Sans', sans-serif" font-size="34" font-weight="800" fill="#FFFFFF" text-anchor="middle">ST</text>
+  </g>
+
+  <!-- Product Labels -->
+  <text x="400" y="740" font-family="'Plus Jakarta Sans', sans-serif" font-size="32" font-weight="800" fill="#FFFFFF" text-anchor="middle" letter-spacing="2">{$titleShort}</text>
+  <text x="400" y="780" font-family="'Inter', sans-serif" font-size="16" font-weight="600" fill="{$colorAccent}" text-anchor="middle" letter-spacing="3">{$tagSub}</text>
+
+  <!-- Bottom Badge: Condition & Price -->
+  <rect x="220" y="830" width="360" height="50" rx="25" fill="rgba(255,255,255,0.12)" stroke="{$colorAccent}" stroke-width="1" />
+  <text x="400" y="862" font-family="'Inter', sans-serif" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle">Rp {$data['selling_price']} • {$data['condition']}</text>
 </svg>
 SVG;
-
-            $svgPath = $storageDir . '/' . $filename;
-            File::put($svgPath, $svgContent);
+            File::put($filePath, $svgContent);
 
             $product = Product::updateOrCreate(
                 ['code' => $data['code']],
                 $data
             );
 
+            // Create primary product image
             ProductImage::updateOrCreate(
+                ['product_id' => $product->id, 'is_primary' => true],
                 [
-                    'product_id' => $product->id,
-                    'is_primary' => true,
-                ],
-                [
-                    'path' => 'products/' . $filename,
+                    'path' => 'products/' . $svgFile,
                     'sort_order' => 1,
+                    'is_primary' => true,
+                    'is_defect' => false,
                 ]
             );
         }
     }
 }
-

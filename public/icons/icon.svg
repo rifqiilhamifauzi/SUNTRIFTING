@@ -1,16 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#1C1C1C" />
+  <defs>
+    <linearGradient id="brand-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#174C3C" />
+      <stop offset="100%" stop-color="#12352A" />
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#brand-grad)" />
   <!-- Inner frame -->
-  <rect x="36" y="36" width="440" height="440" rx="80" fill="none" stroke="#84977B" stroke-width="4" stroke-opacity="0.35" />
+  <rect x="36" y="36" width="440" height="440" rx="80" fill="none" stroke="#EAE3D5" stroke-width="3" stroke-opacity="0.3" />
   
-  <!-- Hanger & S stylized monogram -->
-  <circle cx="256" cy="160" r="40" fill="none" stroke="#FAF9F6" stroke-width="18" stroke-linecap="round" stroke-dasharray="190 60" />
-  <path d="M 170 250 L 256 195 L 342 250 C 355 258 350 275 335 275 L 177 275 C 162 275 157 258 170 250 Z" fill="#84977B" fill-opacity="0.25" stroke="#84977B" stroke-width="14" stroke-linejoin="round" />
+  <!-- Subtle Islamic Star Accent -->
+  <g transform="translate(256, 210)">
+    <rect x="-70" y="-70" width="140" height="140" rx="16" fill="none" stroke="#26745A" stroke-width="6" opacity="0.4" />
+    <rect x="-70" y="-70" width="140" height="140" rx="16" fill="none" stroke="#EAE3D5" stroke-width="4" opacity="0.3" transform="rotate(45)" />
+    <!-- Monogram S -->
+    <text x="0" y="24" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="96" font-weight="800" fill="#F8F6F0" text-anchor="middle">S</text>
+  </g>
   
-  <!-- Modern Monogram "S" -->
-  <text x="256" y="380" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="120" font-weight="800" fill="#FAF9F6" text-anchor="middle" letter-spacing="-2">S</text>
+  <!-- Brand text -->
+  <text x="256" y="390" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="28" font-weight="800" fill="#F8F6F0" text-anchor="middle" letter-spacing="4">SUN-THRIFTING</text>
   
   <!-- Subtitle -->
-  <text x="256" y="425" font-family="'Inter', system-ui, sans-serif" font-size="20" font-weight="600" fill="#84977B" text-anchor="middle" letter-spacing="8">SUNVALLEY</text>
+  <text x="256" y="425" font-family="'Inter', system-ui, sans-serif" font-size="14" font-weight="600" fill="#EAE3D5" text-anchor="middle" letter-spacing="4">MUSLIM ARCHIVE</text>
 </svg>
-

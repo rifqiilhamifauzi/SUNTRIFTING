@@ -1,13 +1,13 @@
 {
-  "name": "Suntrifting - Thrift & Consignment Marketplace",
-  "short_name": "Suntrifting",
-  "description": "Platform digital konsinyasi streetwear vintage dan thrift preloved terpercaya.",
+  "name": "SUN-THRIFTING — Muslim Fashion & Lifestyle Thrift Marketplace",
+  "short_name": "SUN-THRIFTING",
+  "description": "Platform marketplace jual beli pakaian muslim, hijab, dan perlengkapan ibadah preloved berkualitas. Secondhand Treasures, Meaningful Style.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#FAF9F6",
-  "theme_color": "#1C1C1C",
+  "background_color": "#F8F6F0",
+  "theme_color": "#174C3C",
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -29,10 +29,17 @@
   ],
   "shortcuts": [
     {
-      "name": "Katalog Thrift",
+      "name": "Jelajahi Produk",
       "short_name": "Katalog",
-      "description": "Lihat produk thrift terbaru",
+      "description": "Koleksi fashion muslim thrift pilihan",
       "url": "/catalog",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Wishlist Saya",
+      "short_name": "Wishlist",
+      "description": "Daftar produk muslim favorit",
+      "url": "/wishlist",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
@@ -51,4 +58,3 @@
     }
   ]
 }
-

@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Detail Pesanan ' . $order->order_number . ' — Suntrifting'])
+@extends('layouts.app', ['title' => 'Detail Pesanan ' . $order->order_number . ' — SUN-THRIFTING'])
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
@@ -49,7 +49,7 @@
                             <div class="flex-1 min-w-0">
                                 <h4 class="font-heading font-semibold text-xs sm:text-sm text-primary truncate">{{ $item->product_name }}</h4>
                                 <p class="text-[11px] text-gray-400 font-mono mt-0.5">Kode: {{ $item->product_code }}</p>
-                                <p class="text-[11px] text-accent mt-0.5">Konsinyor: {{ $item->supplier ? $item->supplier->name : 'Mitra Suntrifting' }}</p>
+                                <p class="text-[11px] text-accent mt-0.5">Konsinyor: {{ $item->supplier ? $item->supplier->name : 'Mitra SUN-THRIFTING' }}</p>
                             </div>
                             <span class="font-bold text-xs sm:text-sm text-gray-900 font-mono shrink-0">
                                 Rp{{ number_format($item->product_price, 0, ',', '.') }}

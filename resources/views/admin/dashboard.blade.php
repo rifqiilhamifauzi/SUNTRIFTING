@@ -1,4 +1,4 @@
-@extends('layouts.admin', ['title' => 'Admin Dashboard — Suntrifting', 'headerTitle' => 'Ringkasan & Metrik Bisnis Konsinyasi'])
+@extends('layouts.admin', ['title' => 'Admin Dashboard — SUN-THRIFTING', 'headerTitle' => 'Ringkasan & Metrik Bisnis Konsinyasi'])
 
 @section('content')
 <div class="space-y-8">
