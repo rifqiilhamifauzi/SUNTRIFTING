@@ -1,7 +1,7 @@
 @extends('layouts.admin', ['title' => 'Verifikasi Pembayaran — Suntrifting', 'headerTitle' => 'Verifikasi Pembayaran Manual Transfer'])
 
 @section('content')
-<div class="space-y-6" x-data="{ rejectModal: false, selectedPaymentId: null, previewModal: false, previewSrc: '' }">
+<div class="space-y-6" x-data="{ rejectModal: false, verifyModal: false, selectedPaymentId: null, previewModal: false, previewSrc: '', verifyNotes: '' }">
     <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
             <h2 class="font-heading font-bold text-xl text-gray-900">Verifikasi Bukti Transfer Bank</h2>
@@ -82,7 +82,7 @@
                                 @if($pay->status === 'pending')
                                     <form action="{{ route('admin.payments.verify', $pay->id) }}" method="POST" class="inline">
                                         @csrf
-                                        <button type="submit" onclick="return confirm('Apakah uang pembayaran Rp{{ number_format($pay->amount, 0, \', \', \'.\') }} sudah valid masuk di rekening bank Anda?')" 
+                                        <button type="submit" onclick="return confirm('Apakah uang pembayaran Rp{{ number_format($pay->amount, 0, ',', '.') }} sudah valid masuk di rekening bank Anda?')" 
                                                 class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3 py-1.5 rounded-lg text-xs transition shadow-sm">
                                             Terima / Verifikasi
                                         </button>
@@ -151,4 +151,3 @@
     </div>
 </div>
 @endsection
-

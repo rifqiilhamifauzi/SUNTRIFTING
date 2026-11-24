@@ -1,164 +1,177 @@
 @extends('layouts.admin', ['title' => 'Kategori & Subkategori Produk — SUN-THRIFTING', 'headerTitle' => 'Manajemen Kategori & Subkategori'])
 
 @section('content')
-<div class="space-y-6" x-data="{ editModal: false, editCat: {} }">
-    <div class="flex flex-wrap items-center justify-between gap-4">
-        <div>
-            <h2 class="font-heading font-bold text-xl text-charcoal">Kategori & Subkategori Fashion Muslim</h2>
-            <p class="text-xs text-muted-gray mt-0.5">Kelola struktur hierarki kategori produk busana muslim dan perlengkapan ibadah.</p>
+<div class="-mt-2" x-data="{ addModal: false, editModal: false, editCat: {} }" @keydown.escape.window="addModal = false; editModal = false">
+    @php
+        $rows = collect();
+        foreach ($parents as $parent) {
+            $rows->push(['cat' => $parent, 'parent' => null, 'canDelete' => ($parent->products_count + $parent->subcategories->sum('products_count')) === 0]);
+            foreach ($parent->subcategories as $sub) {
+                $rows->push(['cat' => $sub, 'parent' => $parent, 'canDelete' => $sub->products_count === 0]);
+            }
+        }
+    @endphp
+
+    <!-- Tabel Kategori -->
+    <div class="bg-white rounded-2xl border border-warm-beige shadow-sm overflow-hidden">
+            <div class="px-5 py-4 border-b border-warm-beige flex items-center justify-between gap-3">
+                <h3 class="font-heading font-bold text-sm text-charcoal">Data Kategori & Subkategori</h3>
+                <button type="button" @click="addModal = true"
+                        class="bg-primary hover:bg-primary-dark text-white font-semibold px-4 py-2 rounded-xl text-xs flex items-center space-x-1.5 transition shadow-sm">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    <span>Tambah Kategori</span>
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left">
+                    <thead class="bg-cream/70 text-charcoal uppercase tracking-wider text-[10px] font-bold border-b border-warm-beige">
+                        <tr>
+                            <th class="py-3.5 px-4">Nama</th>
+                            <th class="py-3.5 px-4">Kategori Induk</th>
+                            <th class="py-3.5 px-4">Icon</th>
+                            <th class="py-3.5 px-4">Deskripsi</th>
+                            <th class="py-3.5 px-4 text-center">No. Urutan</th>
+                            <th class="py-3.5 px-4 text-center">Produk</th>
+                            <th class="py-3.5 px-4 text-center">Status</th>
+                            <th class="py-3.5 px-4 text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-warm-beige/40">
+                        @forelse($rows as $row)
+                            @php $cat = $row['cat']; @endphp
+                            <tr class="hover:bg-cream/30">
+                                <td class="py-3 px-4">
+                                    <div class="flex items-center space-x-2 {{ $row['parent'] ? 'pl-4' : '' }}">
+                                        @if($row['parent'])
+                                            <i data-lucide="corner-down-right" class="w-3.5 h-3.5 text-secondary shrink-0"></i>
+                                        @endif
+                                        <div>
+                                            <span class="font-semibold text-charcoal block">{{ $cat->name }}</span>
+                                            <span class="font-mono text-[10px] text-muted-gray">{{ $cat->slug }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4 text-charcoal">
+                                    {{ $row['parent'] ? $row['parent']->name : '— (Kategori Utama)' }}
+                                </td>
+                                <td class="py-3 px-4">
+                                    <span class="inline-flex items-center space-x-1.5 text-muted-gray">
+                                        <i data-lucide="{{ $cat->icon ?: 'tag' }}" class="w-3.5 h-3.5 text-secondary"></i>
+                                        <span class="font-mono text-[10px]">{{ $cat->icon ?: '-' }}</span>
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-muted-gray max-w-[220px]">
+                                    <span class="line-clamp-2">{{ $cat->description ?: '-' }}</span>
+                                </td>
+                                <td class="py-3 px-4 text-center font-mono text-charcoal">{{ $cat->sort_order ?? 0 }}</td>
+                                <td class="py-3 px-4 text-center font-bold text-secondary">{{ $cat->products_count }} item</td>
+                                <td class="py-3 px-4 text-center">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold {{ $cat->is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-600' }}">
+                                        {{ $cat->is_active ? 'Aktif' : 'Nonaktif' }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-right">
+                                    <div x-data="{ open: false, top: 0, left: 0 }" class="inline-block text-left">
+                                        <button type="button" x-ref="btn"
+                                                @click="const r = $refs.btn.getBoundingClientRect(); top = (r.bottom + 120 > window.innerHeight) ? r.top - {{ $row['canDelete'] ? 92 : 52 }} : r.bottom + 4; left = r.right - 144; open = !open"
+                                                class="inline-flex items-center space-x-1 bg-primary hover:bg-primary-dark text-white font-semibold px-3 py-1.5 rounded-lg text-xs transition shadow-sm">
+                                            <span>Aksi</span>
+                                            <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                                        </button>
+
+                                        <div x-show="open" x-cloak @click.outside="open = false" @scroll.window.passive="open = false" @keydown.escape.window="open = false"
+                                             :style="`top:${top}px; left:${left}px`"
+                                             class="fixed z-40 w-36 bg-white rounded-xl shadow-xl border border-warm-beige py-1.5 text-left">
+                                            <button type="button" @click="editCat = {{ json_encode($cat) }}; editModal = true; open = false"
+                                                    class="w-full flex items-center space-x-2.5 px-4 py-2 text-xs font-semibold text-charcoal hover:bg-cream transition">
+                                                <i data-lucide="pencil" class="w-3.5 h-3.5 text-muted-gray"></i>
+                                                <span>Edit</span>
+                                            </button>
+                                            @if($row['canDelete'])
+                                                <form action="{{ route('admin.categories.destroy', $cat->id) }}" method="POST">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" onclick="return confirm('{{ $row['parent'] ? 'Hapus subkategori ini?' : 'Hapus kategori utama ini beserta subkategorinya?' }}')"
+                                                            class="w-full flex items-center space-x-2.5 px-4 py-2 text-xs font-semibold text-charcoal hover:bg-rose-50 hover:text-rose-600 transition">
+                                                        <i data-lucide="trash-2" class="w-3.5 h-3.5 text-muted-gray"></i>
+                                                        <span>Hapus</span>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8" class="py-8 text-center text-muted-gray">Belum ada kategori.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        <!-- Categories List (8 cols) -->
-        <div class="lg:col-span-8 space-y-4">
-            @foreach($parents as $parent)
-                <div class="bg-white rounded-2xl border border-warm-beige shadow-sm overflow-hidden" x-data="{ openSub: true }">
-                    <!-- Parent Header -->
-                    <div class="p-4 bg-cream/60 flex items-center justify-between border-b border-warm-beige">
-                        <div class="flex items-center space-x-3">
-                            <button type="button" @click="openSub = !openSub" class="text-secondary hover:text-primary">
-                                <i data-lucide="chevron-down" class="w-4 h-4 transition-transform" :class="openSub ? '' : '-rotate-90'"></i>
-                            </button>
-                            <div class="w-8 h-8 rounded-xl bg-primary text-white flex items-center justify-center shrink-0">
-                                <i data-lucide="{{ $parent->icon ?: 'tag' }}" class="w-4 h-4"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-heading font-bold text-sm text-charcoal">{{ $parent->name }}</h3>
-                                <p class="text-[10px] text-muted-gray">{{ $parent->subcategories->count() }} Subkategori • {{ $parent->products_count }} Produk Langsung</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center space-x-3 text-xs">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold {{ $parent->is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-600' }}">
-                                {{ $parent->is_active ? 'Aktif' : 'Non-Aktif' }}
-                            </span>
-                            <button type="button" @click="editCat = {{ json_encode($parent) }}; editModal = true" class="text-secondary hover:underline font-semibold">
-                                Edit
-                            </button>
-                            @php
-                                $totalProd = $parent->products_count + $parent->subcategories->sum('products_count');
-                            @endphp
-                            @if($totalProd === 0)
-                                <form action="{{ route('admin.categories.destroy', $parent->id) }}" method="POST" class="inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" onclick="return confirm('Hapus kategori utama ini beserta subkategorinya?')" class="text-rose-500 hover:text-rose-700">
-                                        Hapus
-                                    </button>
-                                </form>
-                            @endif
-                        </div>
-                    </div>
-
-                    <!-- Subcategories Sub-table -->
-                    <div x-show="openSub" class="p-2">
-                        @if($parent->subcategories->isEmpty())
-                            <p class="text-xs text-muted-gray p-4 text-center">Belum ada subkategori pada kategori ini.</p>
-                        @else
-                            <table class="w-full text-xs text-left">
-                                <thead class="text-muted-gray uppercase text-[10px] font-bold border-b border-warm-beige/60">
-                                    <tr>
-                                        <th class="py-2 px-3">Nama Subkategori</th>
-                                        <th class="py-2 px-3">Slug</th>
-                                        <th class="py-2 px-3 text-center">Produk</th>
-                                        <th class="py-2 px-3 text-center">Status</th>
-                                        <th class="py-2 px-3 text-right">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-warm-beige/40">
-                                    @foreach($parent->subcategories as $sub)
-                                        <tr class="hover:bg-cream/40">
-                                            <td class="py-2.5 px-3 font-semibold text-charcoal flex items-center space-x-2">
-                                                <i data-lucide="corner-down-right" class="w-3.5 h-3.5 text-secondary"></i>
-                                                <span>{{ $sub->name }}</span>
-                                            </td>
-                                            <td class="py-2.5 px-3 font-mono text-[11px] text-muted-gray">{{ $sub->slug }}</td>
-                                            <td class="py-2.5 px-3 text-center font-bold text-secondary">{{ $sub->products_count }} item</td>
-                                            <td class="py-2.5 px-3 text-center">
-                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold {{ $sub->is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-500' }}">
-                                                    {{ $sub->is_active ? 'Aktif' : 'Nonaktif' }}
-                                                </span>
-                                            </td>
-                                            <td class="py-2.5 px-3 text-right space-x-2">
-                                                <button type="button" @click="editCat = {{ json_encode($sub) }}; editModal = true" class="text-secondary hover:underline font-semibold">
-                                                    Edit
-                                                </button>
-                                                @if($sub->products_count === 0)
-                                                    <form action="{{ route('admin.categories.destroy', $sub->id) }}" method="POST" class="inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" onclick="return confirm('Hapus subkategori ini?')" class="text-rose-500 hover:text-rose-700">
-                                                            Hapus
-                                                        </button>
-                                                    </form>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        @endif
-                    </div>
-                </div>
-            @endforeach
-        </div>
-
-        <!-- Add Category / Subcategory Form (4 cols) -->
-        <div class="lg:col-span-4 bg-white rounded-2xl border border-warm-beige p-6 shadow-sm space-y-4 sticky top-24">
-            <h3 class="font-heading font-bold text-sm text-charcoal pb-3 border-b border-warm-beige">Tambah Kategori / Subkategori</h3>
+    <!-- Add Category Modal -->
+    <div x-show="addModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 overflow-y-auto">
+        <div @click.outside="addModal = false" class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 my-8">
+            <div class="flex items-center justify-between pb-3 border-b border-warm-beige">
+                <span class="font-heading font-bold text-sm text-charcoal">Tambah Kategori / Subkategori</span>
+                <button type="button" @click="addModal = false" class="text-muted-gray hover:text-charcoal"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
 
             <form action="{{ route('admin.categories.store') }}" method="POST" class="space-y-4">
-                @csrf
+                            @csrf
 
-                <div>
-                    <label class="block text-xs font-semibold text-charcoal mb-1">Kategori Induk (Parent)</label>
-                    <select name="parent_id" class="w-full bg-cream border border-warm-beige rounded-xl px-3.5 py-2 text-xs text-charcoal focus:ring-secondary focus:border-secondary">
-                        <option value="">-- Kategori Utama (Tanpa Induk) --</option>
-                        @foreach($parents as $p)
-                            <option value="{{ $p->id }}">{{ $p->name }}</option>
-                        @endforeach
-                    </select>
-                    <p class="text-[10px] text-muted-gray mt-1">Pilih kategori induk jika ingin membuat subkategori.</p>
-                </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-charcoal mb-1">Kategori Induk (Parent)</label>
+                                <select name="parent_id" class="w-full bg-cream border border-warm-beige rounded-xl px-3.5 py-2 text-xs text-charcoal focus:ring-secondary focus:border-secondary">
+                                    <option value="">-- Kategori Utama (Tanpa Induk) --</option>
+                                    @foreach($parents as $p)
+                                        <option value="{{ $p->id }}">{{ $p->name }}</option>
+                                    @endforeach
+                                </select>
+                                <p class="text-[10px] text-muted-gray mt-1">Pilih kategori induk jika ingin membuat subkategori.</p>
+                            </div>
 
-                <div>
-                    <label class="block text-xs font-semibold text-charcoal mb-1">Nama Kategori / Subkategori *</label>
-                    <input type="text" name="name" required placeholder="Contoh: Abaya / Gamis Syar'i" 
-                           class="w-full bg-cream border border-warm-beige rounded-xl px-3.5 py-2 text-xs text-charcoal focus:ring-secondary focus:border-secondary">
-                </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-charcoal mb-1">Nama Kategori / Subkategori *</label>
+                                <input type="text" name="name" required placeholder="Contoh: Abaya / Gamis Syar'i" 
+                                       class="w-full bg-cream border border-warm-beige rounded-xl px-3.5 py-2 text-xs text-charcoal focus:ring-secondary focus:border-secondary">
+                            </div>
 
-                <div>
-                    <label class="block text-xs font-semibold text-charcoal mb-1">Icon Lucide (Opsional)</label>
-                    <input type="text" name="icon" placeholder="sparkles / shirt / moon / sun / gem" 
-                           class="w-full bg-cream border border-warm-beige rounded-xl px-3.5 py-2 text-xs text-charcoal focus:ring-secondary focus:border-secondary">
-                </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-charcoal mb-1">Icon Lucide (Opsional)</label>
+                                <input type="text" name="icon" placeholder="sparkles / shirt / moon / sun / gem" 
+                                       class="w-full bg-cream border border-warm-beige rounded-xl px-3.5 py-2 text-xs text-charcoal focus:ring-secondary focus:border-secondary">
+                            </div>
 
-                <div>
-                    <label class="block text-xs font-semibold text-charcoal mb-1">Deskripsi Singkat</label>
-                    <textarea name="description" rows="2" placeholder="Deskripsi untuk kurasi katalog..." 
-                              class="w-full bg-cream border border-warm-beige rounded-xl px-3.5 py-2 text-xs text-charcoal focus:ring-secondary focus:border-secondary"></textarea>
-                </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-charcoal mb-1">Deskripsi Singkat</label>
+                                <textarea name="description" rows="2" placeholder="Deskripsi untuk kurasi katalog..." 
+                                          class="w-full bg-cream border border-warm-beige rounded-xl px-3.5 py-2 text-xs text-charcoal focus:ring-secondary focus:border-secondary"></textarea>
+                            </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-charcoal mb-1">No. Urutan</label>
-                        <input type="number" name="sort_order" value="0" 
-                               class="w-full bg-cream border border-warm-beige rounded-xl px-3.5 py-2 text-xs text-charcoal focus:ring-secondary focus:border-secondary">
-                    </div>
-                    <div class="flex items-center pt-5">
-                        <label class="flex items-center text-xs text-charcoal cursor-pointer">
-                            <input type="checkbox" name="is_active" value="1" checked class="rounded border-gray-300 text-secondary focus:ring-secondary mr-2">
-                            <span>Status Aktif</span>
-                        </label>
-                    </div>
-                </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-charcoal mb-1">No. Urutan</label>
+                                    <input type="number" name="sort_order" value="0" 
+                                           class="w-full bg-cream border border-warm-beige rounded-xl px-3.5 py-2 text-xs text-charcoal focus:ring-secondary focus:border-secondary">
+                                </div>
+                                <div class="flex items-center pt-5">
+                                    <label class="flex items-center text-xs text-charcoal cursor-pointer">
+                                        <input type="checkbox" name="is_active" value="1" checked class="rounded border-gray-300 text-secondary focus:ring-secondary mr-2">
+                                        <span>Status Aktif</span>
+                                    </label>
+                                </div>
+                            </div>
 
-                <button type="submit" class="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition shadow-sm flex items-center justify-center space-x-2">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
-                    <span>Simpan Kategori</span>
-                </button>
-            </form>
+                            <button type="submit" class="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition shadow-sm flex items-center justify-center space-x-2">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                                <span>Simpan Kategori</span>
+                            </button>
+                        </form>
         </div>
     </div>
 
