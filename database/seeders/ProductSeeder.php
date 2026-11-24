@@ -7,7 +7,6 @@ use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\Supplier;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\File;
 
 class ProductSeeder extends Seeder
 {
@@ -19,12 +18,18 @@ class ProductSeeder extends Seeder
         $supplierSakinah = Supplier::where('name', 'like', '%Sakinah%')->first() ?: Supplier::first();
 
         // Get parent categories
-        $catWanita = Category::where('slug', 'pakaian-muslim-wanita')->first();
-        $catPria = Category::where('slug', 'pakaian-muslim-pria')->first();
-        $catHijab = Category::where('slug', 'hijab-kerudung')->first();
-        $catIbadah = Category::where('slug', 'perlengkapan-ibadah')->first();
-        $catAksesori = Category::where('slug', 'aksesori-muslim')->first();
-        $catAnak = Category::where('slug', 'fashion-muslim-anak')->first();
+        // Dibuat otomatis kalau belum ada, supaya seeder tidak error
+        $makeCategory = fn (string $slug, string $name, string $icon, int $order) => Category::firstOrCreate(
+            ['slug' => $slug],
+            ['name' => $name, 'icon' => $icon, 'description' => $name, 'sort_order' => $order]
+        );
+
+        $catWanita = $makeCategory('pakaian-muslim-wanita', 'Pakaian Muslim Wanita', 'shirt', 10);
+        $catPria = $makeCategory('pakaian-muslim-pria', 'Pakaian Muslim Pria', 'shirt', 11);
+        $catHijab = $makeCategory('hijab-kerudung', 'Hijab & Kerudung', 'layers', 12);
+        $catIbadah = $makeCategory('perlengkapan-ibadah', 'Perlengkapan Ibadah', 'moon', 13);
+        $catAksesori = $makeCategory('aksesori-muslim', 'Aksesori Muslim', 'tag', 14);
+        $catAnak = $makeCategory('fashion-muslim-anak', 'Fashion Muslim Anak', 'smile', 15);
 
         // Subcategories
         $subAbaya = Category::where('name', 'Abaya')->first();
@@ -40,11 +45,15 @@ class ProductSeeder extends Seeder
         $subBros = Category::where('name', 'Bros Hijab')->first();
         $subGamisAnak = Category::where('name', 'Gamis Anak')->first();
 
-        $storageDir = storage_path('app/public/products');
-        if (!File::exists($storageDir)) {
-            File::makeDirectory($storageDir, 0755, true);
-        }
-
+        /*
+         |--------------------------------------------------------------------
+         | GAMBAR PRODUK (dari link online)
+         |--------------------------------------------------------------------
+         | Isi 'images' dengan link langsung ke file gambar (.jpg/.png/.webp).
+         | Elemen pertama = foto utama (tampil di katalog), sisanya = galeri
+         | di halaman detail produk. Link placehold.co di bawah hanya contoh
+         | sementara, silakan ganti dengan link gambar Anda.
+         */
         $items = [
             [
                 'supplier_id' => $supplierMadinah->id,
@@ -69,11 +78,9 @@ class ProductSeeder extends Seeder
                 'defect_description' => null,
                 'weight_grams' => 650,
                 'status' => 'available',
-                'svg_file' => 'abaya-dubai.svg',
-                'title_short' => 'ABAYA DUBAI',
-                'tag_sub' => 'VINTAGE JETBLACK',
-                'color_bg' => '#174C3C',
-                'color_accent' => '#D4AF37',
+                'images' => [
+                    'https://i.pinimg.com/736x/c4/97/27/c497275601ea5b29cda727f29473d21f.jpg',
+                ],
             ],
             [
                 'supplier_id' => $supplierMadinah->id,
@@ -98,11 +105,9 @@ class ProductSeeder extends Seeder
                 'defect_description' => 'Sedikit benang halus terlepas di bagian kelim bawah dalam, sama sekali tidak tampak saat dikenakan.',
                 'weight_grams' => 500,
                 'status' => 'available',
-                'svg_file' => 'gamis-linen.svg',
-                'title_short' => 'GAMIS LINEN',
-                'tag_sub' => 'EARTHY OLIVE',
-                'color_bg' => '#26745A',
-                'color_accent' => '#EAE3D5',
+                'images' => [
+                    'https://i.pinimg.com/736x/7c/cf/9b/7ccf9b66530531043ddbafe209ee692f.jpg',
+                ],
             ],
             [
                 'supplier_id' => $supplierMadinah->id,
@@ -127,11 +132,9 @@ class ProductSeeder extends Seeder
                 'defect_description' => null,
                 'weight_grams' => 380,
                 'status' => 'available',
-                'svg_file' => 'tunik-floral.svg',
-                'title_short' => 'TUNIK FLORAL',
-                'tag_sub' => 'BRAND NEW TAG',
-                'color_bg' => '#858B87',
-                'color_accent' => '#F8F6F0',
+                'images' => [
+                    'https://i.pinimg.com/736x/c4/97/27/c497275601ea5b29cda727f29473d21f.jpg',
+                ],
             ],
             [
                 'supplier_id' => $supplierBayan->id,
@@ -156,11 +159,9 @@ class ProductSeeder extends Seeder
                 'defect_description' => null,
                 'weight_grams' => 350,
                 'status' => 'available',
-                'svg_file' => 'koko-madinah.svg',
-                'title_short' => 'KOKO MADINAH',
-                'tag_sub' => 'SAGE GREEN LONG',
-                'color_bg' => '#174C3C',
-                'color_accent' => '#F8F6F0',
+                'images' => [
+                    'https://i.pinimg.com/736x/43/05/d4/4305d4789c781c63538a215ee099ebcd.jpg',
+                ],
             ],
             [
                 'supplier_id' => $supplierBayan->id,
@@ -185,11 +186,9 @@ class ProductSeeder extends Seeder
                 'defect_description' => 'Warna sedikit pudar wajar pemakaian di bagian dalam kerah belakang, bagian luar mulus bersih.',
                 'weight_grams' => 400,
                 'status' => 'available',
-                'svg_file' => 'kurta-oxford.svg',
-                'title_short' => 'KURTA MODERN',
-                'tag_sub' => 'OXFORD KHAKI',
-                'color_bg' => '#252A27',
-                'color_accent' => '#EAE3D5',
+                'images' => [
+                    'https://placehold.co/800x800/252A27/EAE3D5.png?text=KURTA+MODERN',
+                ],
             ],
             [
                 'supplier_id' => $supplierBayan->id,
@@ -214,11 +213,9 @@ class ProductSeeder extends Seeder
                 'defect_description' => null,
                 'weight_grams' => 450,
                 'status' => 'available',
-                'svg_file' => 'sirwal-chino.svg',
-                'title_short' => 'SIRWAL CHINO',
-                'tag_sub' => 'CASUAL STRETCH',
-                'color_bg' => '#252A27',
-                'color_accent' => '#26745A',
+                'images' => [
+                    'https://placehold.co/800x800/252A27/26745A.png?text=SIRWAL+CHINO',
+                ],
             ],
             [
                 'supplier_id' => $supplierHijab->id,
@@ -243,11 +240,9 @@ class ProductSeeder extends Seeder
                 'defect_description' => null,
                 'weight_grams' => 180,
                 'status' => 'available',
-                'svg_file' => 'pashmina-silk.svg',
-                'title_short' => 'PASHMINA SILK',
-                'tag_sub' => 'SHIMMER EMERALD',
-                'color_bg' => '#26745A',
-                'color_accent' => '#F8F6F0',
+                'images' => [
+                    'https://placehold.co/800x800/26745A/F8F6F0.png?text=PASHMINA+SILK',
+                ],
             ],
             [
                 'supplier_id' => $supplierHijab->id,
@@ -272,11 +267,9 @@ class ProductSeeder extends Seeder
                 'defect_description' => null,
                 'weight_grams' => 150,
                 'status' => 'available',
-                'svg_file' => 'voal-motif.svg',
-                'title_short' => 'VOAL ULTRAFINE',
-                'tag_sub' => 'LASERCUT MOTIF',
-                'color_bg' => '#EAE3D5',
-                'color_accent' => '#174C3C',
+                'images' => [
+                    'https://placehold.co/800x800/EAE3D5/174C3C.png?text=VOAL+ULTRAFINE',
+                ],
             ],
             [
                 'supplier_id' => $supplierSakinah->id,
@@ -301,11 +294,9 @@ class ProductSeeder extends Seeder
                 'defect_description' => null,
                 'weight_grams' => 550,
                 'status' => 'available',
-                'svg_file' => 'mukena-silk.svg',
-                'title_short' => 'MUKENA SILK',
-                'tag_sub' => 'FRENCH LACE POUCH',
-                'color_bg' => '#174C3C',
-                'color_accent' => '#F8F6F0',
+                'images' => [
+                    'https://placehold.co/800x800/174C3C/F8F6F0.png?text=MUKENA+SILK',
+                ],
             ],
             [
                 'supplier_id' => $supplierSakinah->id,
@@ -330,11 +321,9 @@ class ProductSeeder extends Seeder
                 'defect_description' => 'Ada sedikit jejak tekanan lipatan busa di sisi bawah, tidak mempengaruhi kenyamanan sujud sama sekali.',
                 'weight_grams' => 950,
                 'status' => 'available',
-                'svg_file' => 'sajadah-turkey.svg',
-                'title_short' => 'SAJADAH TURKEY',
-                'tag_sub' => 'VELVET CUSHIONED',
-                'color_bg' => '#174C3C',
-                'color_accent' => '#D4AF37',
+                'images' => [
+                    'https://placehold.co/800x800/174C3C/D4AF37.png?text=SAJADAH+TURKEY',
+                ],
             ],
             [
                 'supplier_id' => $supplierHijab->id,
@@ -359,11 +348,9 @@ class ProductSeeder extends Seeder
                 'defect_description' => null,
                 'weight_grams' => 120,
                 'status' => 'available',
-                'svg_file' => 'bros-mutiara.svg',
-                'title_short' => 'BROS MUTIARA',
-                'tag_sub' => 'ZIRCONIA RHODIUM',
-                'color_bg' => '#858B87',
-                'color_accent' => '#FFFFFF',
+                'images' => [
+                    'https://placehold.co/800x800/858B87/FFFFFF.png?text=BROS+MUTIARA',
+                ],
             ],
             [
                 'supplier_id' => $supplierMadinah->id,
@@ -388,88 +375,33 @@ class ProductSeeder extends Seeder
                 'defect_description' => null,
                 'weight_grams' => 300,
                 'status' => 'available',
-                'svg_file' => 'gamis-anak.svg',
-                'title_short' => 'GAMIS ANAK',
-                'tag_sub' => 'KATUN JEPANG SET',
-                'color_bg' => '#26745A',
-                'color_accent' => '#F8F6F0',
+                'images' => [
+                    'https://placehold.co/800x800/26745A/F8F6F0.png?text=GAMIS+ANAK',
+                ],
             ],
         ];
 
         foreach ($items as $data) {
-            $svgFile = $data['svg_file'];
-            $titleShort = $data['title_short'];
-            $tagSub = $data['tag_sub'];
-            $colorBg = $data['color_bg'];
-            $colorAccent = $data['color_accent'];
-
-            unset($data['svg_file'], $data['title_short'], $data['tag_sub'], $data['color_bg'], $data['color_accent']);
-
-            // Generate clean SVG visual
-            $filePath = $storageDir . '/' . $svgFile;
-            $svgContent = <<<SVG
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="100%" height="100%">
-  <defs>
-    <linearGradient id="grad-{$data['code']}" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="{$colorBg}" />
-      <stop offset="100%" stop-color="#12352A" />
-    </linearGradient>
-    <pattern id="pat-{$data['code']}" width="40" height="40" patternUnits="userSpaceOnUse">
-      <circle cx="20" cy="20" r="1.5" fill="{$colorAccent}" opacity="0.15" />
-    </pattern>
-  </defs>
-
-  <!-- Background -->
-  <rect width="800" height="1000" fill="url(#grad-{$data['code']})" />
-  <rect width="800" height="1000" fill="url(#pat-{$data['code']})" />
-
-  <!-- Frame / Border -->
-  <rect x="40" y="40" width="720" height="920" rx="24" fill="none" stroke="{$colorAccent}" stroke-width="2" opacity="0.3" />
-  <rect x="52" y="52" width="696" height="896" rx="16" fill="none" stroke="{$colorAccent}" stroke-width="1" opacity="0.15" />
-
-  <!-- Brand Watermark -->
-  <text x="400" y="140" font-family="'Plus Jakarta Sans', sans-serif" font-size="20" font-weight="800" fill="{$colorAccent}" text-anchor="middle" letter-spacing="8" opacity="0.85">SUN-THRIFTING</text>
-  <text x="400" y="170" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="#FAF9F6" text-anchor="middle" letter-spacing="4" opacity="0.6">CURATED MUSLIM ARCHIVE</text>
-
-  <!-- Center Decorative Emblem -->
-  <g transform="translate(400, 480)">
-    <circle r="180" fill="none" stroke="{$colorAccent}" stroke-width="2" stroke-dasharray="6,6" opacity="0.35" />
-    <circle r="150" fill="rgba(255,255,255,0.04)" stroke="{$colorAccent}" stroke-width="1.5" opacity="0.6" />
-    
-    <!-- Geometric Islamic Star / Octagram Accent -->
-    <rect x="-60" y="-60" width="120" height="120" rx="12" fill="none" stroke="{$colorAccent}" stroke-width="2.5" opacity="0.8" />
-    <rect x="-60" y="-60" width="120" height="120" rx="12" fill="none" stroke="{$colorAccent}" stroke-width="2.5" opacity="0.8" transform="rotate(45)" />
-    
-    <!-- Item Icon / Lettering -->
-    <text x="0" y="12" font-family="'Plus Jakarta Sans', sans-serif" font-size="34" font-weight="800" fill="#FFFFFF" text-anchor="middle">ST</text>
-  </g>
-
-  <!-- Product Labels -->
-  <text x="400" y="740" font-family="'Plus Jakarta Sans', sans-serif" font-size="32" font-weight="800" fill="#FFFFFF" text-anchor="middle" letter-spacing="2">{$titleShort}</text>
-  <text x="400" y="780" font-family="'Inter', sans-serif" font-size="16" font-weight="600" fill="{$colorAccent}" text-anchor="middle" letter-spacing="3">{$tagSub}</text>
-
-  <!-- Bottom Badge: Condition & Price -->
-  <rect x="220" y="830" width="360" height="50" rx="25" fill="rgba(255,255,255,0.12)" stroke="{$colorAccent}" stroke-width="1" />
-  <text x="400" y="862" font-family="'Inter', sans-serif" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle">Rp {$data['selling_price']} • {$data['condition']}</text>
-</svg>
-SVG;
-            File::put($filePath, $svgContent);
+            $images = $data['images'] ?? [];
+            unset($data['images']);
 
             $product = Product::updateOrCreate(
                 ['code' => $data['code']],
                 $data
             );
 
-            // Create primary product image
-            ProductImage::updateOrCreate(
-                ['product_id' => $product->id, 'is_primary' => true],
-                [
-                    'path' => 'products/' . $svgFile,
-                    'sort_order' => 1,
-                    'is_primary' => true,
+            // Hapus gambar lama lalu buat ulang, supaya aman dijalankan berulang
+            $product->images()->delete();
+
+            foreach (array_values($images) as $i => $url) {
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'path' => $url,            // URL penuh (https://...)
+                    'sort_order' => $i + 1,
+                    'is_primary' => $i === 0,  // gambar pertama = foto utama
                     'is_defect' => false,
-                ]
-            );
+                ]);
+            }
         }
     }
 }

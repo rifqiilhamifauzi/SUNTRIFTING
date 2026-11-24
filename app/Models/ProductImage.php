@@ -15,12 +15,14 @@ class ProductImage extends Model
         'path',
         'sort_order',
         'is_primary',
+        'is_defect',
     ];
 
     protected function casts(): array
     {
         return [
             'is_primary' => 'boolean',
+            'is_defect' => 'boolean',
             'sort_order' => 'integer',
         ];
     }
@@ -32,7 +34,11 @@ class ProductImage extends Model
 
     public function getUrlAttribute(): string
     {
+        // Mendukung link online (https://...) dan file lokal di storage
+        if (str_starts_with($this->path, 'http://') || str_starts_with($this->path, 'https://')) {
+            return $this->path;
+        }
+
         return asset('storage/' . $this->path);
     }
 }
-

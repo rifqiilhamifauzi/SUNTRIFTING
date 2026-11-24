@@ -60,7 +60,7 @@
             <!-- Hero Editorial Visual Card -->
             <div class="lg:col-span-5 relative">
                 <div class="relative mx-auto max-w-sm rounded-3xl overflow-hidden shadow-2xl border border-white/20 bg-white/10 backdrop-blur-md p-3 group">
-                    <img src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=800&auto=format&fit=crop&q=80" 
+                    <img src="https://i.pinimg.com/1200x/70/f7/fc/70f7fc040e30d09d890290c896db0336.jpg" 
                          alt="Muslimah Fashion Editorial" 
                          class="w-full h-96 object-cover rounded-2xl group-hover:scale-105 transition-transform duration-700">
                     <div class="p-4 flex items-center justify-between">
