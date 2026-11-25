@@ -26,7 +26,7 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-xs text-left">
                     <thead class="bg-cream/70 text-charcoal uppercase tracking-wider text-[10px] font-bold border-b border-warm-beige">
-                        <tr>
+                        <tr><!--  -->
                             <th class="py-3.5 px-4">Nama</th>
                             <th class="py-3.5 px-4">Kategori Induk</th>
                             <th class="py-3.5 px-4">Icon</th>

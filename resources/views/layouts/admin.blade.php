@@ -64,17 +64,17 @@
         [
             'label' => 'Pesanan',
             'icon'  => 'shopping-cart',
-            'active' => ['admin.orders.*'],
+            'active' => ['admin.orders.*', 'admin.payments.*'],
             'items' => [
                 ['label' => 'Pesanan Customer', 'icon' => 'shopping-cart', 'url' => $r(['admin.orders.index'])],
+                ['label' => 'Verifikasi Pembayaran', 'icon' => 'receipt-text', 'url' => $r(['admin.payments.index'])],
             ],
         ],
         [
             'label' => 'Keuangan',
             'icon'  => 'wallet',
-            'active' => ['admin.payments.*', 'admin.profit*', 'admin.profit-sharing.*', 'admin.payouts.*'],
+            'active' => ['admin.profit*', 'admin.profit-sharing.*', 'admin.payouts.*'],
             'items' => [
-                ['label' => 'Verifikasi Pembayaran', 'icon' => 'receipt-text', 'url' => $r(['admin.payments.index'])],
                 ['label' => 'Bagi Hasil (Profit Sharing)', 'icon' => 'pie-chart', 'url' => $r(['admin.profit-sharing.index', 'admin.profit_sharing.index', 'admin.profits.index', 'admin.profit.index'])],
                 ['label' => 'Pencairan Dana', 'icon' => 'banknote', 'url' => $r(['admin.payouts.index'])],
             ],

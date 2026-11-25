@@ -151,7 +151,7 @@
                                     <span>{{ $pay->order->order_number }}</span>
                                     <span class="text-accent font-mono font-bold">Rp{{ number_format($pay->amount, 0, ',', '.') }}</span>
                                 </div>
-                                <p class="text-[11px] text-gray-500 mt-0.5">Dari: {{ $pay->account_name ?: $pay->order->user->name }} ({{ $pay->bank_name }})</p>
+                                <p class="text-[11px] text-gray-500 mt-0.5">Dari: {{ $pay->account_name ?: ($pay->order ? $pay->order->recipient_name : ($pay->order->user->name ?? 'Pembeli')) }} ({{ $pay->bank_name }})</p>
                             </a>
                         @endforeach
                     </div>
@@ -209,11 +209,17 @@
                     @forelse($recentOrders as $order)
                         <tr class="hover:bg-gray-50/50">
                             <td class="py-3 px-4 font-mono font-bold text-gray-900">{{ $order->order_number }}</td>
-                            <td class="py-3 px-4">{{ $order->user ? $order->user->name : $order->recipient_name }}</td>
+                            <td class="py-3 px-4">
+                                <div class="font-bold text-gray-900">{{ $order->recipient_name }}</div>
+                                <div class="text-[10px] text-gray-400 font-mono">{{ $order->recipient_phone }} &bull; {{ $order->city }}</div>
+                            </td>
                             <td class="py-3 px-4 font-mono font-bold">Rp{{ number_format($order->total_amount, 0, ',', '.') }}</td>
                             <td class="py-3 px-4">{!! $order->order_status_badge !!}</td>
                             <td class="py-3 px-4">{!! $order->payment_status_badge !!}</td>
-                            <td class="py-3 px-4 text-gray-400 font-mono">{{ $order->created_at->format('d/m/Y H:i') }}</td>
+                            <td class="py-3 px-4 font-mono text-gray-500">
+                                <div>{{ $order->created_at->timezone('Asia/Jakarta')->format('d/m/Y H:i') }} WIB</div>
+                                <span class="text-[10px] text-accent block font-sans">{{ $order->created_at->timezone('Asia/Jakarta')->diffForHumans() }}</span>
+                            </td>
                             <td class="py-3 px-4 text-right">
                                 <a href="{{ route('admin.orders.show', $order->id) }}" class="text-accent hover:underline font-semibold">
                                     Detail

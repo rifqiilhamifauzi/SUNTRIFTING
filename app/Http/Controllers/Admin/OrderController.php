@@ -23,21 +23,33 @@ class OrderController extends Controller
     {
         $search = $request->input('search');
         $orderStatus = $request->input('order_status');
-        $paymentStatus = $request->input('payment_status');
 
+        // LOGIKA BARU: Daftar Pesanan Customer HANYA berisikan pesanan yang SUDAH TERVERIFIKASI (sudah bayar)
         $orders = Order::with(['user', 'latestPayment', 'shipment', 'items'])
+            ->where('payment_status', 'paid')
             ->when($search, function ($q, $search) {
-                $q->where('order_number', 'like', "%{$search}%")
-                    ->orWhere('recipient_name', 'like', "%{$search}%")
-                    ->orWhere('recipient_phone', 'like', "%{$search}%");
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('order_number', 'like', "%{$search}%")
+                        ->orWhere('recipient_name', 'like', "%{$search}%")
+                        ->orWhere('recipient_phone', 'like', "%{$search}%");
+                });
             })
             ->when($orderStatus, fn ($q) => $q->where('order_status', $orderStatus))
-            ->when($paymentStatus, fn ($q) => $q->where('payment_status', $paymentStatus))
             ->latest()
             ->paginate(15)
             ->withQueryString();
 
-        return view('admin.orders.index', compact('orders', 'search', 'orderStatus', 'paymentStatus'));
+        // Hitung statistik untuk tab & badge
+        $counts = [
+            'all_verified' => Order::where('payment_status', 'paid')->count(),
+            'processing' => Order::where('payment_status', 'paid')->where('order_status', 'processing')->count(),
+            'shipped' => Order::where('payment_status', 'paid')->where('order_status', 'shipped')->count(),
+            'completed' => Order::where('payment_status', 'paid')->where('order_status', 'completed')->count(),
+            'needs_verification' => \App\Models\Payment::where('status', 'pending')->whereNotNull('proof_image')->count(),
+            'unpaid' => \App\Models\Payment::where('status', 'pending')->whereNull('proof_image')->count(),
+        ];
+
+        return view('admin.orders.index', compact('orders', 'search', 'orderStatus', 'counts'));
     }
 
     public function show(int $id)

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Models\Payment;
 use App\Services\PaymentService;
 use Exception;
@@ -20,15 +21,49 @@ class PaymentController extends Controller
 
     public function index(Request $request)
     {
-        $status = $request->input('status', 'pending');
+        // Kategori antrean pembayaran:
+        // 1. 'needs_verification' (sudah transfer & upload bukti, siap dicek admin) -> default
+        // 2. 'unpaid' (menunggu transfer / belum upload bukti)
+        // 3. 'rejected' (pembayaran ditolak)
+        $status = $request->input('status', 'needs_verification');
+        if (!in_array($status, ['needs_verification', 'unpaid', 'rejected'])) {
+            $status = 'needs_verification';
+        }
 
-        $payments = Payment::with(['order.user', 'verifier'])
-            ->when($status, fn ($q) => $q->where('status', $status))
-            ->latest()
-            ->paginate(15)
-            ->withQueryString();
+        $search = $request->input('search');
 
-        return view('admin.payments.index', compact('payments', 'status'));
+        $query = Payment::with(['order.user', 'verifier']);
+
+        if ($search) {
+            $query->whereHas('order', function ($q) use ($search) {
+                $q->where('order_number', 'like', "%{$search}%")
+                    ->orWhere('recipient_name', 'like', "%{$search}%")
+                    ->orWhere('recipient_phone', 'like', "%{$search}%");
+            });
+        }
+
+        if ($status === 'needs_verification') {
+            // Customer sudah bayar & upload bukti transfer
+            $query->where('status', 'pending')->whereNotNull('proof_image');
+        } elseif ($status === 'unpaid') {
+            // Belum bayar / belum upload bukti transfer
+            $query->where('status', 'pending')->whereNull('proof_image');
+        } elseif ($status === 'rejected') {
+            // Bukti transfer ditolak
+            $query->where('status', 'rejected');
+        }
+
+        $payments = $query->latest()->paginate(15)->withQueryString();
+
+        // Hitung statistik untuk badge
+        $counts = [
+            'needs_verification' => Payment::where('status', 'pending')->whereNotNull('proof_image')->count(),
+            'unpaid' => Payment::where('status', 'pending')->whereNull('proof_image')->count(),
+            'rejected' => Payment::where('status', 'rejected')->count(),
+            'verified_orders' => Order::where('payment_status', 'paid')->count(),
+        ];
+
+        return view('admin.payments.index', compact('payments', 'status', 'search', 'counts'));
     }
 
     public function verify(Request $request, int $id)
@@ -42,7 +77,13 @@ class PaymentController extends Controller
         try {
             $this->paymentService->verifyPayment($payment, Auth::user(), $validated['notes'] ?? null);
 
-            return back()->with('success', 'Pembayaran berhasil diverifikasi! Profit sharing otomatis dibuat.');
+            $orderNumber = $payment->order ? $payment->order->order_number : '#' . $payment->order_id;
+
+            if ($request->input('redirect') === 'payments') {
+                return back()->with('success', "Pembayaran untuk order {$orderNumber} berhasil diverifikasi! Pesanan telah berpindah ke Daftar Pesanan Customer.");
+            }
+
+            return redirect()->route('admin.orders.index')->with('success', "Pembayaran untuk order {$orderNumber} berhasil diverifikasi! Pesanan kini telah berpindah ke Daftar Pesanan Customer (Siap Diproses/Dikemas).");
         } catch (Exception $e) {
             return back()->with('error', 'Gagal memverifikasi: ' . $e->getMessage());
         }
@@ -67,4 +108,3 @@ class PaymentController extends Controller
         }
     }
 }
-

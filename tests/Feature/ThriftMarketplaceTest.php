@@ -293,4 +293,81 @@ class ThriftMarketplaceTest extends TestCase
         $response->assertSee('SUN-THRIFTING');
         $response->assertSee('Titip Jual');
     }
+
+    public function test_admin_orders_index_only_contains_verified_paid_orders(): void
+    {
+        $admin = User::where('role', 'admin')->first();
+
+        $response = $this->actingAs($admin)->get('/admin/orders');
+        $response->assertStatus(200);
+        $response->assertSee('Pesanan Terverifikasi');
+
+        // Check orders passed to view all have payment_status 'paid'
+        $ordersInView = $response->viewData('orders');
+        foreach ($ordersInView as $ord) {
+            $this->assertEquals('paid', $ord->payment_status);
+        }
+    }
+
+    public function test_admin_payments_index_supports_categorized_status_filters(): void
+    {
+        $admin = User::where('role', 'admin')->first();
+
+        // 1. Needs verification
+        $resNeeds = $this->actingAs($admin)->get('/admin/payments?status=needs_verification');
+        $resNeeds->assertStatus(200);
+        $resNeeds->assertSee('Perlu Dicek');
+
+        // 2. Unpaid
+        $resUnpaid = $this->actingAs($admin)->get('/admin/payments?status=unpaid');
+        $resUnpaid->assertStatus(200);
+        $resUnpaid->assertSee('Belum Bayar');
+
+        // 3. Rejected
+        $resRejected = $this->actingAs($admin)->get('/admin/payments?status=rejected');
+        $resRejected->assertStatus(200);
+        $resRejected->assertSee('Ditolak');
+    }
+
+    public function test_verifying_payment_moves_order_to_customer_orders_list(): void
+    {
+        $admin = User::where('role', 'admin')->first();
+
+        // Find or create a pending payment
+        $payment = Payment::where('status', 'pending')->first();
+        if (!$payment) {
+            $customer = User::where('role', 'customer')->first();
+            $product = Product::where('status', 'available')->first();
+            $cartService = app(\App\Services\CartService::class);
+            $orderService = app(\App\Services\OrderService::class);
+
+            $cartService->addItem($customer, $product->id);
+            $order = $orderService->checkout($customer, [
+                'recipient_name' => 'Test Mover',
+                'recipient_phone' => '081234567890',
+                'shipping_address' => 'Jl. Test No. 1',
+                'province' => 'DKI Jakarta',
+                'city' => 'Jakarta',
+                'postal_code' => '10110',
+                'payment_method' => 'manual_bank_transfer',
+            ]);
+            $payment = $order->latestPayment;
+        }
+
+        $order = $payment->order;
+
+        // Before verification: order is NOT in /admin/orders
+        $resBefore = $this->actingAs($admin)->get('/admin/orders');
+        $ordersBefore = $resBefore->viewData('orders');
+        $this->assertFalse($ordersBefore->contains('id', $order->id));
+
+        // Admin verifies payment
+        $resVerify = $this->actingAs($admin)->post('/admin/payments/' . $payment->id . '/verify');
+        $resVerify->assertRedirect('/admin/orders');
+
+        // After verification: order IS in /admin/orders
+        $resAfter = $this->actingAs($admin)->get('/admin/orders');
+        $ordersAfter = $resAfter->viewData('orders');
+        $this->assertTrue($ordersAfter->contains('id', $order->id));
+    }
 }
